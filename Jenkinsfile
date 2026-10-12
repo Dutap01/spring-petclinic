@@ -29,7 +29,7 @@ pipeline {
                 echo 'Docker Image Create'
                 sh '''
                     docker build -t spring-petclinic:${BUILD_NUMBER} .
-                    docker tag spring-petclinic:${BUILD_NUMBER} dutap01/spring-petclinic:latest
+                    docker tag spring-petclinic:${BUILD_NUMBER} dutap/spring-petclinic:latest
                 '''
             }
         }
@@ -38,14 +38,14 @@ pipeline {
             steps {
                 echo 'Docker Image Push'
                 sh 'echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USR} --password-stdin'
-                sh 'docker image push dutap01/spring-petclinic:latest'
+                sh 'docker image push dutap/spring-petclinic:latest'
             }
 
             post {
                 always {
                     sh '''
                         docker rmi -f spring-petclinic:${BUILD_NUMBER} || true
-                        docker rmi -f dutap01/spring-petclinic:latest || true
+                        docker rmi -f dutap/spring-petclinic:latest || true
                     '''
                 }
             }
@@ -65,7 +65,7 @@ pipeline {
                                     execCommand: '''
                                         docker rm -f $(docker ps -aq) || true
                                         docker rmi -f $(docker images -q) || true
-                                        docker run -itd -p 80:8080 --name=spring-petclinic dutap01/spring-petclinic:latest
+                                        docker run -itd -p 80:8080 --name=spring-petclinic dutap/spring-petclinic:latest
                                     ''',
                                     execTimeout: 120000,
                                     flatten: false,
