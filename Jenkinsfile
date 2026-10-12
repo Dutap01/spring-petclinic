@@ -32,10 +32,9 @@ pipeline {
                                     cleanRemote: false,
                                     excludes: '',
                                     execCommand: '''
-                                        fuser -k 8080/tcp || true
-                                        export BUILD_ID=Spring-PetClinic
-
-                                        nohup java -jar /home/ubuntu/spring-petclinic-4.0.0-SNAPSHOT.jar > /home/ubuntu/nohup.out 2>&1 &
+                                        docker rm -f $docker ps -aq)
+                                        docker rmi -f $(docker images -q)
+                                        docker run -itd -p 80:8080 --name=spring-petclinic dutap/spring-petclinic:latest
                                     ''',
                                     execTimeout: 120000,
                                     flatten: false,
