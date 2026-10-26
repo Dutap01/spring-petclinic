@@ -20,7 +20,9 @@ pipeline {
         stage('Maven Build') {
             steps {
                 echo 'Maven Build'
-                sh 'mvn -Dmaven.test.failure.ignore=true clean package'
+                // DB 통합테스트(MySQL/Postgres)는 Testcontainers로 노드 Docker에 DB를 띄우는데
+                // Jenkins Pod에서는 그 포트에 접근할 수 없어 대기하다 실패하므로 제외
+                sh "mvn -Dmaven.test.failure.ignore=true -Dtest='!MySqlIntegrationTests,!PostgresIntegrationTests' -Dsurefire.failIfNoSpecifiedTests=false clean package"
             }
         }
 
@@ -48,42 +50,6 @@ pipeline {
                         docker rmi -f dutap/spring-petclinic:latest || true
                     '''
                 }
-            }
-        }
-
-        stage('SSH Publish') {
-            steps {
-                echo 'SSH Publish'
-                sshPublisher(
-                    publishers: [
-                        sshPublisherDesc(
-                            configName: 'target',
-                            transfers: [
-                                sshTransfer(
-                                    cleanRemote: false,
-                                    excludes: '',
-                                    execCommand: '''
-                                        docker rm -f $(docker ps -aq) || true
-                                        docker rmi -f $(docker images -q) || true
-                                        docker run -itd -p 80:8080 --name=spring-petclinic dutap/spring-petclinic:latest
-                                    ''',
-                                    execTimeout: 120000,
-                                    flatten: false,
-                                    makeEmptyDirs: false,
-                                    noDefaultExcludes: false,
-                                    patternSeparator: '[, ]+',
-                                    remoteDirectory: '',
-                                    remoteDirectorySDF: false,
-                                    removePrefix: 'target',
-                                    sourceFiles: 'target/*.jar'
-                                )
-                            ],
-                            usePromotionTimestamp: false,
-                            useWorkspaceInPromotion: false,
-                            verbose: false
-                        )
-                    ]
-                )
             }
         }
     }
