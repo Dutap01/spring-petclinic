@@ -15,7 +15,7 @@ pipeline {
     environment {
         DOCKERHUB_CRED = credentials('dockerCredentials')
         IMAGE = 'dutap/spring-petclinic'
-        // 빌드 번호 태그로 배포해야 이미지가 바뀌어 롤링 업데이트가 일어나고, rollout undo로 롤백할 수 있음
+        // latest 대신 빌드 번호 태그로 배포해야 이미지가 바뀌어 롤링 업데이트가 일어나고, rollout undo로 롤백할 수 있음
         TAG = "${BUILD_NUMBER}"
     }
 
@@ -38,7 +38,7 @@ pipeline {
         stage('Docker Image Create') {
             steps {
                 echo 'Docker Image Create'
-                sh 'docker build -t ${IMAGE}:${TAG} -t ${IMAGE}:latest .'
+                sh 'docker build -t ${IMAGE}:${TAG} .'
             }
         }
 
@@ -46,18 +46,12 @@ pipeline {
             steps {
                 echo 'Docker Image Push'
                 sh 'echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USR} --password-stdin'
-                sh '''
-                    docker image push ${IMAGE}:${TAG}
-                    docker image push ${IMAGE}:latest
-                '''
+                sh 'docker image push ${IMAGE}:${TAG}'
             }
 
             post {
                 always {
-                    sh '''
-                        docker rmi -f ${IMAGE}:${TAG} || true
-                        docker rmi -f ${IMAGE}:latest || true
-                    '''
+                    sh 'docker rmi -f ${IMAGE}:${TAG} || true'
                 }
             }
         }
@@ -66,11 +60,9 @@ pipeline {
             steps {
                 echo 'Deploy to Kubernetes (was-ns)'
                 // Jenkins Pod의 ServiceAccount(jenkins) 권한으로 실행 - jenkins-rbac.yaml 참고
-                // annotate는 set image 뒤에 해야 새 revision에 기록됨 (앞에 하면 직전 revision을 덮어씀)
+                // 저장소의 k8s/petclinic-deployment.yaml에서 __TAG__를 빌드 번호로 바꿔 apply (없으면 생성, 있으면 갱신)
                 sh '''
-                    kubectl -n was-ns set image deployment/petclinic-deployment petclinic=${IMAGE}:${TAG}
-                    kubectl -n was-ns annotate deployment/petclinic-deployment \
-                        kubernetes.io/change-cause="jenkins build #${TAG}" --overwrite
+                    sed "s|__TAG__|${TAG}|g" k8s/petclinic-deployment.yaml | kubectl apply -f -
                     kubectl -n was-ns rollout status deployment/petclinic-deployment --timeout=300s
                 '''
             }

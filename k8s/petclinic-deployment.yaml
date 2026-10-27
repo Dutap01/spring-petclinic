@@ -1,0 +1,40 @@
+# Jenkinsfile Deploy stage에서 __TAG__를 빌드 번호로 치환한 뒤 kubectl apply
+# (직접 적용할 때는 __TAG__를 Docker Hub에 있는 태그로 바꿔서 apply)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petclinic-deployment
+  namespace: was-ns
+  annotations:
+    kubernetes.io/change-cause: "jenkins build #__TAG__"   # rollout history에 표시
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: petclinic
+  template:
+    metadata:
+      labels:
+        app: petclinic
+    spec:
+      containers:
+      - name: petclinic
+        image: dutap/spring-petclinic:__TAG__
+        env:
+        - name: SERVER_SERVLET_CONTEXT_PATH
+          value: "/clinic"
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: petclinic-svc
+  namespace: was-ns
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    app: petclinic
