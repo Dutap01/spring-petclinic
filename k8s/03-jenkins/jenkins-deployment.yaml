@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+  namespace: jenkins-ns
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate                  # 같은 jenkins_home을 두 Pod가 동시에 쓰지 않도록
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      serviceAccountName: jenkins   # was-ns 배포 권한 (jenkins-rbac.yaml)
+      securityContext:
+        supplementalGroups: [988]   # 노드의 docker.sock 그룹(docker) GID
+      containers:
+      - name: jenkins
+        image: dutap/jenkins-docker:2.580.1   # k8s/03-jenkins/Dockerfile
+        env:
+        - name: JENKINS_OPTS
+          value: "--prefix=/jenkins"
+        ports:
+        - containerPort: 8080
+        - containerPort: 50000
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: jenkins-storage
+          mountPath: /var/jenkins_home
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+          type: Socket
+      - name: jenkins-storage
+        persistentVolumeClaim:
+          claimName: nfs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-svc
+  namespace: jenkins-ns
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30000
+  selector:
+    app: jenkins

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jenkins-ns   # Jenkins (CI/CD)
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: was-ns       # Spring PetClinic (WAS)

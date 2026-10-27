@@ -1,5 +1,5 @@
 # Jenkinsfile Deploy stage에서 __TAG__를 빌드 번호로 치환한 뒤 kubectl apply
-# (직접 적용할 때는 __TAG__를 Docker Hub에 있는 태그로 바꿔서 apply)
+# (직접 적용할 때: sed "s|__TAG__|<Docker Hub 태그>|g" petclinic-deployment.yaml | kubectl apply -f -)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
