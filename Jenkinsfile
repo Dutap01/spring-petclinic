@@ -6,6 +6,12 @@ pipeline {
         maven 'M3'
     }
 
+    // GitHub Webhook이 내부망(192.168.56.x)에 닿지 않으므로 5분마다 저장소 변경을 확인해 자동 빌드
+    // (Jenkinsfile의 triggers는 이 파일로 빌드가 한 번 실행된 뒤부터 잡에 등록됨)
+    triggers {
+        pollSCM('H/5 * * * *')
+    }
+
     environment {
         DOCKERHUB_CRED = credentials('dockerCredentials')
         IMAGE = 'dutap/spring-petclinic'
