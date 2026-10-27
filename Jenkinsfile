@@ -60,10 +60,11 @@ pipeline {
             steps {
                 echo 'Deploy to Kubernetes (was-ns)'
                 // Jenkins Pod의 ServiceAccount(jenkins) 권한으로 실행 - jenkins-rbac.yaml 참고
+                // annotate는 set image 뒤에 해야 새 revision에 기록됨 (앞에 하면 직전 revision을 덮어씀)
                 sh '''
+                    kubectl -n was-ns set image deployment/petclinic-deployment petclinic=${IMAGE}:${TAG}
                     kubectl -n was-ns annotate deployment/petclinic-deployment \
                         kubernetes.io/change-cause="jenkins build #${TAG}" --overwrite
-                    kubectl -n was-ns set image deployment/petclinic-deployment petclinic=${IMAGE}:${TAG}
                     kubectl -n was-ns rollout status deployment/petclinic-deployment --timeout=300s
                 '''
             }
