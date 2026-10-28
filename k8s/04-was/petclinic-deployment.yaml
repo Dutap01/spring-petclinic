@@ -25,6 +25,16 @@ spec:
           value: "/clinic"
         ports:
         - containerPort: 8080
+        # 앱이 실제로 요청을 받을 수 있을 때만 Ready → 배포 중 502 방지,
+        # Ready가 안 되면 rollout status가 300초 후 실패해 Jenkins가 rollout undo
+        readinessProbe:
+          httpGet:
+            path: /clinic/actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 10   # 기동 약 9초
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
 ---
 apiVersion: v1
 kind: Service
