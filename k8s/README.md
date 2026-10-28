@@ -46,5 +46,5 @@ k8s/
 
 ## 주의
 
-- spring-petclinic의 nohttp checkstyle 때문에 저장소 안 파일(주석 포함)에 `http://` 문자열을 쓰면 Maven Build가 실패한다.
+- spring-petclinic의 nohttp checkstyle 때문에 저장소 안 파일(주석 포함)에 https가 아닌 http 스킴의 URL을 쓰면 Maven Build가 실패한다. (https만 허용)
 - PetClinic Ingress는 Jenkins 권한 밖이라 `install.sh`에서 한 번만 적용한다.
