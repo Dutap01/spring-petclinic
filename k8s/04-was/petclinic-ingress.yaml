@@ -1,4 +1,4 @@
-# http://www.tap.com/clinic -> petclinic-svc
+# www.tap.com/clinic -> petclinic-svc
 # 앱이 SERVER_SERVLET_CONTEXT_PATH=/clinic 으로 직접 서브패스를 처리하므로 rewrite 하지 않음
 # (Jenkins 권한 밖이므로 install.sh에서 한 번만 apply)
 apiVersion: networking.k8s.io/v1
