@@ -23,8 +23,6 @@ spec:
         env:
         - name: SERVER_SERVLET_CONTEXT_PATH
           value: "/clinic"
-        - name: JAVA_TOOL_OPTIONS      # 롤백 테스트용: 힙 1MB로 기동 실패 유도
-          value: "-Xmx1m"
         ports:
         - containerPort: 8080
 ---
