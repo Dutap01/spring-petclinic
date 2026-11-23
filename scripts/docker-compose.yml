@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+  spring-petclinic:
+    image: dutap01/spring-petclinic:latest
+    container_name: spring-petclinic
+    prots:
+      - "80:8080"
+      
