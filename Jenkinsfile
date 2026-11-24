@@ -67,6 +67,15 @@ pipeline {
             steps {
                 echo 'Code Deploy Workload' 
                 // aws11-spring-petclinic
+                withAWS(region:"ap-northeast-2", credentials: "${AWS_CREDENTIAL_NAME}"){
+                    sh '''
+                    aws deploy create-deployment-group \
+                    --application-name aws10-spring-petclinic \
+                    --auto-scaling-group aws10-asg \
+                    --deployment-group-name aws10-code-deploy-${BUILD_NUMBER} \
+                    --deployment-config-name CodeDeployDefault.OneAtATime \
+                    --service-role-arn arn:aws:iam::491085389788:role/aws10-code-deploy-service-role
+                    '''
             }
         }
     }
