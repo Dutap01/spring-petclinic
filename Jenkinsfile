@@ -76,6 +76,13 @@ pipeline {
                     --deployment-config-name CodeDeployDefault.OneAtATime \
                     --service-role-arn arn:aws:iam::491085389788:role/aws10-code-deploy-service-role
                     '''
+                    // ----------배포 생성---------------
+                    sh '''
+                    aws deploy create-deployment --application-name awsr10-spring-petclinic \
+                    --deployment-config-name CodeDeployDefault.OneAtATime \
+                    --deployment-group-name aws10-code-deploy-${BUILD_NUMBER} \
+                    --s3-location bucket=aws10-s3-bucket,bundleType=zip,key=deploy.zip
+                    '''
             }
         }
     }
