@@ -61,6 +61,11 @@ pipeline {
                     }
                 }
             }
+            post {
+                always {
+                    sh 'rm -rf deploy.zip'
+                }
+            }
         }
 
         stage('Code Deploy Workload') {
