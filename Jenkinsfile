@@ -65,7 +65,8 @@ pipeline {
 
         stage('Code Deploy Workload') {
             steps {
-                echo 'Code Deploy Workload'
+                echo 'Code Deploy Workload' 
+                // aws11-spring-petclinic
             }
         }
     }
