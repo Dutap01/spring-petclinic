@@ -1,8 +1,18 @@
 pipeline {
-    stage('docker build') {
-        steps {
-            echo 'docker build'
+    stages{
+        stage('docker build && push') {
+            steps {
+                docker push dutap/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_VERSION)
+                '''
+            }
+            post {
+                always {
+                    sh '''
+                    docker rmi -f $(DOCKER_IMAGE_NAME):$(BUILD_NUMBER)
+                    docker rmi -f dutap/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_VERSION)
+                }
         }
+    }
     }stage('Git Clone') {
         steps {}
             echo 'Git Clone'
@@ -24,6 +34,7 @@ pipeline {
                 docker push dutap/${DOCKER_IMAGE_NAME}:${BUIULD_IMAGE_VERSION}
             '''
         }
+        
     }
     stage('Upload S3') {
         steps {
